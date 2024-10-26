@@ -1,0 +1,12 @@
+#!/system/bin/sh
+
+######### IMPORT BOOTLINUX ENVIRONMENT #########
+SCRIPT_PATH=$(readlink -f $0)
+. ${SCRIPT_PATH%/*}/bootlinux_env
+
+echo "Checking is there are files inside /etc/init.d to start."
+if [ -e $mnt/etc/init.d/ ]; then
+	$busybox chroot $mnt run-parts -a start /etc/init.d/
+fi
+$busybox chroot $mnt /usr/bin/env su -l
+killlinux

@@ -1,0 +1,304 @@
+#!/system/bin/sh
+
+if [ -x /system/xbin/busybox ]; then
+	busybox=/system/xbin/busybox
+elif [ -x /system/bin/busybox ]; then
+	busybox=/system/bin/busybox
+else
+	echo "Busybox not found!  Install it, dummy!"
+	log "Busybox not found!  Install it, dummy!"
+	exit 1
+fi
+
+######### CHECK FOR ROOT #########
+f_checkforroot(){
+	perm=$(id | $busybox cut -b 5)
+    if [ "$perm" != "0" ]; then
+		echo "ROOT NOT DETECTED! Type su first before executing this script"
+		exit 1
+	fi
+}
+
+######### VARIABLES #########
+mnt=
+if [ -n "$1" ]; then
+    if [ -d "$1" ]; then
+        mnt=$1
+    else
+        echo "Directory $1 does not found"
+        exit 1
+    fi
+elif [ -d "/data/alpine" ]; then
+    mnt=/data/alpine
+elif [ -d "/data/debian" ]; then
+    mnt=/data/debian
+elif [ -d "/data/ubuntu" ]; then
+    mnt=/data/ubuntu
+elif [ -d "/data/arch" ]; then
+    mnt=/data/arch
+elif [ -d "/data/kali" ]; then
+    mnt=/data/kali
+elif [ -d "/data/fedora" ]; then
+    mnt=/data/fedora
+elif [ -d "/data/manjaro" ]; then
+    mnt=/data/manjaro
+elif [ -d "/data/void" ]; then
+    mnt=/data/void
+else
+    echo "No chroot installed";
+    exit 1
+fi
+######### CHECK FOR INSTALL #########
+# There is a bug that will create the resolv.conf
+# If we continue on with bootlinux even after we
+# remove chroot.  So stop here if removed or else
+# chroot is never uninstalled.
+
+####### SYSFILE CREATION #######
+# Responsible for creating files which are not found in Android,
+# but are needed in Linux
+
+if [ ! -e "/dev/stdin" -o ! -e "/dev/stdout" -o ! -e "/dev/stderr" ]; then
+	[ -e "/dev/stdin" ] || ln -s /proc/self/fd/0 /dev/stdin
+	[ -e "/dev/stdout" ] || ln -s /proc/self/fd/1 /dev/stdout
+	[ -e "/dev/stderr" ] || ln -s /proc/self/fd/2 /dev/stderr
+fi
+
+
+######### MOUNT #########
+mount_sdcard() {
+	mountpoint -q "$mnt/sdcard" && return 0
+
+	for sdcard in \
+		"$EXTERNAL_STORAGE" \
+		/storage/emulated/0 \
+		/storage/emulated/legacy \
+		/storage/sdcard0 \
+		/sdcard
+	do
+		[ -d "$sdcard" ] &&
+			$busybox mount -o bind "$sdcard" "$mnt/sdcard" &&
+				return 0
+	done
+	return 1
+}
+
+mount_external_sd() {
+	mountpoint -q "$mnt/external_sd" && return 0
+
+	for external_sd in \
+		/storage/extSdCard \
+		/storage/sdcard1 \
+		/storage/external_sd \
+		/external_sd
+	do
+		[ -d "$external_sd" ] &&
+			$busybox mount -o bind "$external_sd" "$mnt/external_sd" &&
+				return 0
+	done
+	return 1
+}
+
+mount_usbdisk() {
+	mountpoint -q "$mnt/mnt/usbdisk" && return 0
+
+	for usbdisk in /storage/usb*; do
+		[ -d "$usbdisk" ] &&
+			$busybox mount -o bind "$usbdisk" "$mnt/mnt/usbdisk" &&
+				return 0
+	done
+	return 1
+}
+
+mount_external_storage() {
+	external_sd_mounted=false
+	usbdisk_mounted=false
+	mount_external_sd && external_sd_mounted=true
+	mount_usbdisk && usbdisk_mounted=true
+
+	# try marshmallow storage names
+	for storage in /storage/*-*; do
+		# if both mount successfully then skip
+		$external_sd_mounted && $usbdisk_mounted && return
+		if [ -d "$storage" ]; then
+			if ! $external_sd_mounted; then
+				$busybox mount -o bind "$storage" "$mnt/external_sd" &&
+					external_sd_mounted=true
+			elif ! $usbdisk_mounted; then
+				$busybox mount -o bind "$storage" "$mnt/usbdisk" &&
+					usbdisk_mounted=true
+			fi
+		fi
+	done
+}
+
+mount_linux_chroot() {
+    sdkVer="$(getprop ro.system.build.version.sdk)"
+
+    mkdir -p $mnt/dev
+    mkdir -p $mnt/proc
+    mkdir -p $mnt/sys
+    mkdir -p $mnt/system
+    mkdir -p $mnt/sdcard
+    mkdir -p $mnt/external_sd
+
+    if [ $sdkVer -ge 29 ]; then
+        mkdir -p $mnt/apex
+        cd "/apex"
+        for f in *; do
+            mkdir -p "$mnt/apex/$f"
+        done
+        cd - 2>&1 > /dev/null
+    fi
+    mkdir -p $mnt/data/data
+    mkdir -p $mnt/data/dalvik-cache
+    mkdir -p $mnt/vendor
+    mkdir -p $mnt/odm
+    mkdir -p $mnt/linkerconfig
+    ######### SET TUN ########
+    mkdir -p /dev/net
+    rm -f /dev/net/tun
+
+    # This appears to work with miredo
+    mknod /dev/net/tun c 10 200
+
+    # ln -s /dev/tun /dev/net/tun 2> /dev/null
+
+    ######### SET DNS ########
+
+    # setup
+    rm $mnt/etc/resolv.conf
+    touch $mnt/etc/resolv.conf
+
+    # add two public dns entries
+    echo "nameserver 1.1.1.1" >> $mnt/etc/resolv.conf
+    echo "nameserver 1.0.0.1" >> $mnt/etc/resolv.conf
+    chmod 644 $mnt/etc/resolv.conf
+
+    ######### MOUNTING FILESYSTEM IN CHROOT #########
+    f_checkforroot
+
+    ######### REMOUNT DATA ########
+    $busybox mount -o remount,suid /data
+
+    ######### MOUNT DEV ########
+    if [ ! "$(mountpoint $mnt/dev 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/dev ] && mkdir -p $mnt/dev
+        $busybox mount --bind /dev $mnt/dev && bllog "[+] mounted /dev"
+    fi
+
+    ######### MOUNT DEV PTS ########
+    if [ ! "$(mountpoint $mnt/dev/pts 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/dev/pts ] && mkdir -p $mnt/dev/pts
+        $busybox mount -t devpts devpts $mnt/dev/pts && bllog "[+] mounted /dev/pts"
+    fi
+    
+    ######### MOUNT DEV SHM ########
+    if [ ! "$(mountpoint $mnt/dev/shm 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/dev/shm ] && mkdir -p $mnt/dev/shm
+        $busybox mount -t tmpfs tmpfs $mnt/dev/shm && bllog "[+] mounted /dev/shm"
+    fi
+
+    ######### MOUNT PROC ########
+    if [ ! "$(mountpoint $mnt/proc 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/proc ] && mkdir -p $mnt/proc
+        $busybox mount -t proc proc $mnt/proc && bllog "[+] mounted /proc"
+    fi
+
+  	######### MOUNT SYS ########
+    if [ ! "$(mountpoint $mnt/sys 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/sys ] && mkdir -p $mnt/sys
+        $busybox mount -t sysfs sys $mnt/sys && bllog "[+] mounted /sys"
+    fi
+
+    # Android
+
+    ######### MOUNT APEX #######
+    if [ $sdkVer -ge 29 ]; then
+        grep "$mnt/apex" /proc/mounts -q 2>&1 > /dev/null
+        if [[ "$?" -ne 0 ]]; then
+            cd /apex
+            for f in *; do
+                $busybox mount --rbind "/apex/$f" "$mnt/apex/$f" && bllog "[+] mounted /apex/$f"
+            done
+        fi
+    fi
+
+    ####### MOUNT DATA ########
+    if [ ! "$(mountpoint $mnt/data/data 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/data/data ] && mkdir -p $mnt/data/data
+        $busybox mount -o bind /data/data $mnt/data/data && bllog "[+] mounted /data/data"
+    fi
+
+    ####### MOUNT DALVIK-CACHE #######
+    if [ ! "$(mountpoint $mnt/data/dalvik-cache 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/data/dalvik-cache ] && mkdir -p $mnt/data/dalvik-cache
+        $busybox mount -o bind /data/data $mnt/data/dalvik-cache && bllog "[+] mounted /data/dalvik-cache"
+    fi
+
+    ######## MOUNT LINKERCONFIG ########
+    if [ ! "$(mountpoint $mnt/linkerconfig 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/linkerconfig ] && mkdir -p $mnt/linkerconfig
+        $busybox mount -o bind /linkerconfig $mnt/linkerconfig && bllog "[+] mounted /linkerconfig"
+    fi
+
+    ######### MOUNT SYSTEM ########
+    if [ ! "$(mountpoint $mnt/system 2> /dev/null | grep 'is a')" ]; then
+        [ ! -d $mnt/system ] && mkdir -p $mnt/system
+        $busybox mount -r -o bind /system $mnt/system && bllog "[+] mounted /system"
+    fi
+
+    #enable depmod/modprobe support in rootfs
+    if [ ! "$(mountpoint $mnt/lib/modules 2> /dev/null | grep 'is a')" ]; then
+       $busybox mount -r -o bind /system/lib/modules $mnt/lib/modules && bllog "[+] mounted /lib/modules"
+    fi
+
+    ######### MOUNT INTERNAL | EXTERNAL SDCARD | USBDISK ########
+    mount_sdcard
+    mount_external_sd
+
+    #########
+    $busybox chmod 666 /dev/null
+
+    sed "/export ANDROID_DATA=\"\/data\"/d" -i "$mnt/etc/profile"
+    echo "export ANDROID_DATA=\"/data\"" >> "$mnt/etc/profile"
+    sed "/export ANDROID_ROOT=\"\/system\"/d" -i "$mnt/etc/profile"
+    echo "export ANDROID_ROOT=\"/system\"" >> "$mnt/etc/profile"
+    sed "/export ANDROID_ART_ROOT=\"\/apex\/com.android.art\"/d" -i "$mnt/etc/profile"
+    echo "export ANDROID_ART_ROOT=\"/apex/com.android.art\"" >> "$mnt/etc/profile"
+    sed "/export ANDROID_RUNTIME_ROOT=\"\/apex\/com.android.runtime\"/d" -i "$mnt/etc/profile"
+    echo "export ANDROID_RUNTIME_ROOT=\"/apex/com.android.runtime\"" >> "$mnt/etc/profile"
+    sed "/export ANDROID_I18N_ROOT=\"\/apex\/com.android.i18n\"/d" -i "$mnt/etc/profile"
+    echo "export ANDROID_I18N_ROOT=\"/apex/com.android.i18n\"" >> "$mnt/etc/profile"
+    sed "/export ANDROID_TZDATA_ROOT=\"\/apex\/com.android.tzdata\"/d" -i "$mnt/etc/profile"
+    echo "export ANDROID_TZDATA_ROOT=\"/apex/com.android.tzdata\"" >> "$mnt/etc/profile"
+    sed "/export BOOTCLASSPATH=\"/d" -i "$mnt/etc/profile"
+    echo "export BOOTCLASSPATH=\"/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/system/framework/framework.jar:/system/framework/framework-graphics.jar:/system/framework/ext.jar:/system/framework/telephony-common.jar:/system/framework/voip-common.jar:/system/framework/ims-common.jar:/apex/com.android.i18n/javalib/core-icu4j.jar:/system/framework/telephony-ext.jar:/apex/com.android.appsearch/javalib/framework-appsearch.jar:/apex/com.android.conscrypt/javalib/conscrypt.jar:/apex/com.android.ipsec/javalib/android.net.ipsec.ike.jar:/apex/com.android.media/javalib/updatable-media.jar:/apex/com.android.mediaprovider/javalib/framework-mediaprovider.jar:/apex/com.android.os.statsd/javalib/framework-statsd.jar:/apex/com.android.permission/javalib/framework-permission.jar:/apex/com.android.permission/javalib/framework-permission-s.jar:/apex/com.android.scheduling/javalib/framework-scheduling.jar:/apex/com.android.sdkext/javalib/framework-sdkextensions.jar:/apex/com.android.tethering/javalib/framework-connectivity.jar:/apex/com.android.tethering/javalib/framework-tethering.jar:/apex/com.android.wifi/javalib/framework-wifi.jar\"" >> "$mnt/etc/profile"
+    sed "/export DEX2OATBOOTCLASSPATH=\"/d" -i "$mnt/etc/profile"
+    echo "export DEX2OATBOOTCLASSPATH=\"/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/system/framework/framework.jar:/system/framework/framework-graphics.jar:/system/framework/ext.jar:/system/framework/telephony-common.jar:/system/framework/voip-common.jar:/system/framework/ims-common.jar:/apex/com.android.i18n/javalib/core-icu4j.jar:/system/framework/telephony-ext.jar\"" >> "$mnt/etc/profile"
+
+    # NETWORK SETTINGS #
+    $busybox sysctl -w net.ipv4.ip_forward=1
+    echo "127.0.0.1		 localhost linux" > $mnt/etc/hosts
+    echo "::1				 localhost ip6-localhost ip6-loopback" >> $mnt/etc/hosts
+    echo "linux" > $mnt/proc/sys/kernel/hostname
+    echo "The Linux chroot has been started."
+    if [ -f /sdcard/debug ]; then
+        echo " [!] Everytime you mount the linux chroot, please press ENTER to continue. (If chroot is already mounted, this won't prompt.)"
+        read
+    fi
+    log "The Linux chroot has been started."
+
+}
+
+############ STARTING ############
+
+echo "Mounting Linux Chroot..."
+mount_linux_chroot
+
+if [ -d "$mnt/usr" ]; then
+    echo "The Linux chroot should be already running!"
+else
+    echo "Missing required folder, exit now...."
+    exit 1
+fi

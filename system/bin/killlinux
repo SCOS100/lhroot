@@ -1,0 +1,100 @@
+#!/system/bin/sh
+
+if [ -x /system/xbin/busybox ]; then
+	busybox=/system/xbin/busybox
+elif [ -x /system/bin/busybox ]; then
+	busybox=/system/bin/busybox
+else
+	echo "Busybox not found!  Install it, dummy!"
+	log "Busybox not found!  Install it, dummy!"
+	exit
+fi
+export bin=/system/bin
+if [ -n "$1" ]; then
+    if [ -d "$1" ]; then
+        export mnt="$1"
+    else
+        echo "Directory $1 not exist"
+        exit 1
+    fi
+elif [ -d "/data/alpine" ]; then
+   export mnt=/data/alpine
+elif [ -d "/data/debian" ]; then
+   export mnt=/data/debian
+elif [ -d "/data/ubuntu" ]; then
+   export mnt=/data/ubuntu
+elif [ -d "/data/kali" ]; then
+    export mnt=/data/kali
+elif [ -d "/data/fedora" ]; then
+    export mnt=/data/fedora
+elif [ -d "/data/arch" ]; then
+    export mnt=/data/arch
+elif [ -d "/data/manjaro" ]; then
+    export mnt=/data/manjaro
+elif [ -d "/data/void" ]; then
+    export mnt="/data/void"
+else
+    echo "No chroot installed"
+    exit 1
+fi
+
+
+########## Kill all running linux services and processes ##########
+kill_pids() {
+    bllog "[!] Killing all running linux services .."
+    local lsof_full=$($busybox lsof | awk '{print $1}' | grep -c '^lsof')
+    if [ "${lsof_full}" -eq 0 ]; then
+        local pids=$($busybox lsof | grep "$mnt" | awk '{print $1}' | uniq)
+    else
+        local pids=$($busybox lsof | grep "$mnt" | awk '{print $2}' | uniq)
+    fi
+    if [ -n "${pids}" ]; then
+        kill -9 ${pids} 2> /dev/null
+        return $?
+    fi
+    return 0
+}
+
+PRESERVED_PATH=$PATH
+export PATH=/usr/bin:/usr/sbin:/bin:/usr/local/bin:/usr/local/sbin:$PATH
+export TERM=linux
+export HOME=/root
+export LOGNAME=root
+unset LD_PRELOAD
+
+echo "Shutting down SSH Server"
+$busybox chmod 666 /dev/null
+
+$busybox chroot $mnt /etc/init.d/sshd stop
+
+echo "Shutting down Postgresql"
+$busybox chroot $mnt /etc/init.d/postgresql stop
+
+echo "Shutting down Apache2"
+$busybox chroot $mnt /etc/init.d/apache2 stop
+
+echo "Kill all Linux services and processes"
+kill_pids
+
+# unmount everything
+
+echo "Removing all Linux mounts"
+$busybox umount $mnt/dev/pts && echo "unmounted pts"
+$busybox umount $mnt/dev && echo "unmounted dev"
+$busybox umount $mnt/proc && echo "unmounted proc"
+$busybox umount $mnt/sys && echo "unmounted sys"
+$busybox umount $mnt/system && echo "unmounted system"
+$busybox umount $mnt/sdcard && echo "unmounted sdcard"
+$busybox umount $mnt/external_sd && echo "unmounted external_sd"
+$busybox umount $mnt/data/data && echo "unmounted data/data"
+$busybox umount $mnt/data/dalvik-cache && echo "unmounted data/dalvik-cache"
+$busybox umount $mnt/linkerconfig && echo "unmounted linkerconfig"
+
+cd "$mnt/apex"
+for f in *; do
+    $busybox umount "$mnt/apex/$f" && echo "unmounted apex/$f"
+done
+cd - 2>&1 > /dev/null
+
+export PATH=$PRESERVED_PATH
+

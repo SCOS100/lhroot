@@ -1,0 +1,483 @@
+#!/system/bin/sh
+# Terminal Magisk Mod Template
+# by veez21 @ xda-developers
+
+
+# Magisk Module ID **
+ID="lhroot"
+
+# Detect root
+_name=$(basename $0)
+ls /data >/dev/null 2>&1 || { echo "$ID needs to run as root!"; echo "type 'su' then '$_name'"; exit 1; }
+
+# Magisk Mod Directory
+[ -d "/sbin/.magisk" ] && MOUNTPATH="/sbin/.magisk/modules" || MOUNTPATH="$(find /dev -mindepth 2 -maxdepth 2 -type d -name ".magisk")/modules"
+MODDIR="$MOUNTPATH/$ID"
+[ ! -d $MODDIR ] && { echo "Module not detected!"; exit 1; }
+
+if command -v busybox &> /dev/null
+then
+    _bb=$(command -v busybox)
+fi
+
+# Set directory for each chroot
+alpine="/data/alpine"
+debian="/data/debian"
+ubuntu="/data/ubuntu"
+arch="/data/arch"
+kali="/data/kali"
+fedora="/data/fedora"
+manjaro="/data/manjaro"
+void="/data/void"
+
+tmp="/data/local/tmp"
+
+# Load mod-util.sh
+. $MODDIR/mod-util.sh || exit $?
+
+# Set Log Files
+mount -o remount,rw /cache 2>/dev/null
+mount -o rw,remount /cache 2>/dev/null
+# > Logs should go in this file
+LOG=/data/local/tmp/$ID.log
+oldLOG=/data/local/tmp/$ID-old.log
+# > Verbose output goes here
+VERLOG=/data/local/tmp/$ID-verbose.log
+oldVERLOG=/data/local/tmp/$ID-verbose-old.log
+stdoutLOG=$MODDIR/logs/$ID-STDOUT.log
+oldstdoutLOG=$MODDIR/logs/$ID-STDOUT-old.log
+
+# Start Logging verbosely
+mv -f $VERLOG $oldVERLOG 2>/dev/null; mv -f $LOG $oldLOG 2>/dev/null; mv -f $stdoutLOG $oldstdoutLOG 2>/dev/null
+# exec 3>&1
+# exec 1>$stdoutLOG
+set -x 2>$VERLOG
+
+# Main
+# > You can start your MOD here.
+# > You can add functions, variables & etc.
+# > Rather than editing the default vars above.
+
+checkdir () {
+    if [ -d "$1" ]; then
+        first=1
+        echo "skipping downloading"
+    fi
+}
+
+alpine () {
+	folder=$alpine
+	tarball="$tmp/alpine.tar.gz"
+	archurl=
+	checkdir "$folder"
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            case $ARCH in
+                arm)
+                    archurl="armv7" ;;
+                arm64)
+                    archurl="aarch64" ;;
+                x86)
+                    archurl="x86" ;;
+                x64)
+                    archurl="x86_64" ;;
+                *)
+                    abort "unknown arch" ;;
+            esac
+            wget "https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/${archurl}/alpine-minirootfs-3.17.2-${archurl}.tar.gz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xf ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch Alpine with the bootlinux script"
+}
+
+debian () {
+    folder=$debian
+    checkdir "$folder"
+    tarball="$tmp/debian.tar.xz"
+    archurl=
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            case $ARCH in
+                arm)
+                    archurl="armhf" ;;
+                arm64)
+                    archurl="arm64" ;;
+                x86)
+                    archurl="i386" ;;
+                x64)
+                    archurl="amd64" ;;
+                *)
+                    abort "unknown arch" ;;
+            esac
+            wget "https://raw.githubusercontent.com/FerryAr/lhroot-repo/main/Rootfs/Debian/${archurl}/debian-rootfs-${archurl}.tar.xz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xfJ ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch Debian with the bootlinux script"
+}
+
+ubuntu () {
+    folder=$ubuntu
+    checkdir "$folder"
+    tarball="$tmp/ubuntu.tar.xz"
+    archurl=
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            case $ARCH in
+                arm)
+                    archurl="armhf" ;;
+                arm64)
+                    archurl="arm64" ;;
+                x86)
+                    archurl="i386" ;;
+                x64)
+                    archurl="amd64" ;;
+                *)
+                    abort "unknown arch"
+            esac
+            wget "https://raw.githubusercontent.com/FerryAr/lhroot-repo/main/Rootfs/Ubuntu/${archurl}/ubuntu-rootfs-${archurl}.tar.xz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xfJ ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch Ubuntu with the bootlinux script"
+}
+
+void () {
+    folder=$void
+    checkdir "$folder"
+    tarball="$tmp/void.tar.xz"
+    archurl=
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            case $ARCH in
+                arm)
+                    archurl="armhf" ;;
+                arm64)
+                    archurl="arm64" ;;
+                x86)
+                    archurl="i386" ;;
+                x64)
+                    archurl="amd64" ;;
+                *)
+                    abort "unknown arch" ;;
+            esac
+            wget "https://raw.githubusercontent.com/FerryAr/lhroot-repo/main/Rootfs/Void/${archurl}/void-rootfs-${archurl}.tar.xz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xfJ ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch Void with bootlinux script"
+}
+
+arch_arm () {
+    folder=$arch
+    checkdir "$folder"
+    tarball="$tmp/arch.tar.gz"
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            archurl=
+            case $ARCH in
+                arm)
+                    archurl="armv7" ;;
+                arm64)
+                    archurl="aarch64" ;;
+                *)
+                    abort "unknown arch, maybe your arch is x64?"
+            esac
+                wget "https://sg.mirror.archlinuxarm.org/os/ArchLinuxARM-${archurl}-latest.tar.gz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xf ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch launch Arch Linux with the bootlinux script"
+}
+
+arch_64 () {
+    folder=$arch
+    checkdir "$folder"
+    tarball="$tmp/arch.tar.gz"
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            archurl=
+            case $ARCH in
+                x64)
+                    archurl="x86_64" ;;
+                *)
+                    abort "Unknown arch, maybe your arch is x86 or arm?" ;;
+            esac
+            wget "https://mirrors.edge.kernel.org/archlinux/iso/2023.02.01/archlinux-bootstrap-2023.02.01-${archurl}.tar.gz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xf ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch Arch Linux with the bootlinux script"
+}
+
+manjaro () {
+    folder="/data/manjaro"
+    checkdir "$folder"
+    tarball="$tmp/manjaro.tar.xz"
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            case $ARCH in
+                arm64)
+                    archurl="https://archive.org/download/manjaro-rootfs-arm64.tar/manjaro-rootfs-arm64.tar.xz" ;;
+                *)
+                    abort "Only Support ARM64" ;;
+            esac
+            wget $archurl -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xf ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch Manjaro with the bootlinux script"
+}
+
+kali () {
+    folder="/data/kali"
+    checkdir "$folder"
+    tarball="$tmp/kali.tar.xz"
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            archurl=
+            case $ARCH in
+                arm)
+                    archurl="armhf" ;;
+                arm64)
+                    archurl="arm64" ;;
+                x86)
+                    archurl="i386" ;;
+                x64)
+                    archurl="amd64" ;;
+                *)
+                    abort "unknown arch" ;;
+            esac
+            wget "https://raw.githubusercontent.com/FerryAr/lhroot-repo/main/Rootfs/Kali/${archurl}/kali-rootfs-${archurl}.tar.xz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xfJ ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space"
+    rm $tarball
+    echo "You can now launch Kali with bootlinux script"
+}
+
+fedora () {
+    folder="/data/fedora"
+    checkdir "$folder"
+    tarball="$tmp/fedora.tar.xz"
+    if [ "$first" != 1 ]; then
+        if [ ! -f $tarball ]; then
+            echo "Downloading Rootfs, please wait..."
+            case $ARCH in
+                arm)
+                    archurl="armhf" ;;
+                arm64)
+                    archurl="arm64" ;;
+                x64)
+                    archurl="amd64" ;;
+                *)
+                    abort "unknown/unsupported arch" ;;
+            esac
+            wget "https://raw.githubusercontent.com/FerryAr/lhroot-repo/main/Rootfs/Fedora/${archurl}/fedora-rootfs-${archurl}.tar.xz" -qO $tarball & e_spinner
+        fi
+        mkdir -p "$folder"
+        cd "$folder"
+        echo "Decompressing Rootfs..."
+        tar xfJ ${tarball} 2> /dev/null||:
+        cd $HOME
+    fi
+    echo "Removing rootfs tarball for some space..."
+    rm $tarball
+    echo "You can now launch Fedora with bootlinux script"
+}
+
+install_chroot () {
+    clear
+    while true; do
+        echo "$div"
+        title_div "Install which distro?"
+        echo "$div"
+        echo "0. Back"
+        echo "1. Arch Linux ARM"
+        echo "2. Arch Linux x64"
+        echo "3. Alpine Linux"
+        echo "4. Debian"
+        echo "5. Fedora"
+        echo "6. Kali Linux"
+        echo "7. Manjaro"
+        echo "8. Ubuntu"
+        echo "9. Void Linux"
+        read -r choice?'--> '
+        echo " "
+        case $choice in
+            0) break 3;;
+            1) arch_arm ;;
+            2) arch_64 ;;
+            3) alpine ;;
+            4) debian ;;
+            5) fedora ;;
+            6) kali ;;
+            7) manjaro ;;
+            8) ubuntu ;;
+            9) void ;;
+        esac
+    done
+}
+
+remove_chroot () {
+    clear
+    installed=false
+    while true; do
+        echo "$div"
+        title_div "Remove which distro?"
+        echo "$div"
+        echo "0. Back"
+        echo "1. Arch Linux ARM"
+        echo "2. Arch Linux x64"
+        echo "3. Alpine Linux"
+        echo "4. Debian"
+        echo "5. Fedora"
+        echo "6. Kali Linux"
+        echo "7. Manjaro"
+        echo "8. Ubuntu"
+        echo "9. Void Linux"
+        read -r choice?'--> '
+        echo " "
+        case $choice in
+            0) break 3;;
+            1)
+                installed=true
+                lmount=$arch
+                ;;
+            2)
+                installed=true
+                lmount=$arch
+                ;;
+            3) 
+                installed=true
+                lmount=$alpine
+                ;;
+            4)
+                installed=true
+                lmount=$debian
+                ;;
+            5)
+                installed=true
+                lmount=$fedora
+                ;;
+            6)
+                installed=true
+                lmount=$kali
+                ;;
+            7)
+                installed=true
+                lmount=$manjaro
+                ;;
+            8)
+                installed=true
+                lmount=$ubuntu
+                ;;
+            9)
+                installed=true
+                lmount=$void
+                ;;
+        esac
+        if [ $installed ] && [ -d $lmount ]; then
+            killlinux
+	    if [ "$(mountpoint $lmount/dev 2> /dev/null | grep 'is a')" ]; then
+	    	echo "/dev is still mounted, please reboot your device."
+		sleep 1
+		echo "After reboot you can rerun this script or remove chroot yourself with 'rm -rf /data/<chroot folder> command'"
+		exit 1;
+	    else
+		echo "Check if any mountpoint is still mounted on chroot folder."
+		sleep 1;
+		echo "I give you 30 seconds to think twice before removing chroot folder."
+		sleep 1;
+		echo "To ensure that all mountpoint is unmounted, I recommend you to reboot your device."
+		sleep 1;
+		echo "After reboot you can rerun this script or remove chroot yourself with 'rm -rf /data/<chroot folder> command'"
+		sleep 30;
+		rm -rf $lmount
+		echo "Chroot removed"
+	    fi
+        else
+            echo "No chroot installed"
+        fi
+    done
+}
+
+mod_head
+echo " "
+
+test_connection || abort "This module requires internet for running!"
+
+while true; do
+    clear
+    echo "$div"
+    title_div "Chroot Installer - Mod by SCOS100"
+    echo "$div"
+    title_div "Choose Option"
+    echo "$div"
+    echo "1. Install Chroot"
+    echo "2. Remove Chroot"
+    echo "q. quit"
+    read -r choice?'--> '
+    echo " "
+    case $choice in
+        1) install_chroot ;;
+        2) remove_chroot ;;
+        q) exit 0 ;;
+    esac
+done

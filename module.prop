@@ -1,0 +1,6 @@
+id=lhroot
+name=Linux Chroot Installer
+version=v2.2.1M
+versionCode=2
+author=FerryAr - Mod by SCOS100
+description=Systemless linux chroot installer and chroot boot script - Modded version.
