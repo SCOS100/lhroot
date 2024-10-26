@@ -1,6 +1,6 @@
 # Linux Chroot Installer
 
-Systemless Linux chroot installer and Linux chroot boot script
+Systemless Linux chroot installer and Linux chroot boot script - Modded by ***SCOS100***
 
 ## Requirements
 - Rooted with Magisk
@@ -12,7 +12,7 @@ Systemless Linux chroot installer and Linux chroot boot script
 ![Manjaro-Linux-Android](https://i.ibb.co/gdpw8QG/lhroot.png)
 
 ## NOTICE
-Due to many cases like [this](https://github.com/FerryAr/lhroot/issues/18) and [this](https://github.com/FerryAr/lhroot/issues/21). Please make sure ALL mountpoint on chroot folder is UNMOUNTED before removing chroot folder. I don't responsible for lost all data, phone bricking, etc. You can check this repository that all the code I wrote, doesn't intentionally remove your data or bricking your phone. Use this module if you are familiar about Linux Enviroment. DWYOR!
+-Due to many cases like [this](https://github.com/FerryAr/lhroot/issues/18) and [this](https://github.com/FerryAr/lhroot/issues/21). Please make sure ALL mountpoint on chroot folder is UNMOUNTED before removing chroot folder. I don't responsible for lost all data, phone bricking, etc. You can check this repository that all the code I wrote, doesn't intentionally remove your data or bricking your phone.- This is fixed, because `killlinux` is called after exiting. Use this module if you are familiar about Linux Enviroment. DWYOR!
 
 ## Usage
 
@@ -28,7 +28,8 @@ After installation to boot into Linux Chroot use :
 bootlinux
 ```
 
-After v2.1 you can run 2 or more chroot instances, just pass chroot folder, e.g.
+To run 2 or more chroot instances, just pass chroot folder, e.g.
+
 ```console
 bootlinux /data/manjaro
 ```
@@ -39,7 +40,10 @@ To unmount bind directory use :
 killlinux
 ```
 
-After v2.1 you can terminate specific instance, just pass chroot folder, e.g.
+***Note***: You don't need to do this anymore, after the exit command is supplied or KILL signal is executed.
+
+To terminate specific instance, just pass chroot folder, e.g.
+
 ```console
 killlinux /data/manjaro
 ```
@@ -66,7 +70,7 @@ mount_image <path to img> <path to linux directory>
 - Ubuntu, Installed on /data/ubuntu
 - Void Linux, Installed on /data/void
 
-...more distro added soon
+...more distro added soon (Will probably not do this.)
 
 ## Supported Architectures
 - arm
@@ -75,12 +79,10 @@ mount_image <path to img> <path to linux directory>
 - x64
 
 ## TODO
-- [ ] Migrate all file used in lhroot to my repo (WIP)
 - [ ] Built in Audio support
-- [ ] Cross compile all dependancies
 
 ## Credits
-- [mod-util](https://github.com/veez21/mod-util) by @veez21
+- [mod-util](https://github.com/veez21/mod-util) by @veez21- [Original lhroot](https://github.com/lhroot/lhroot)
 - Magisk by @topjohnwu
 
 ## License
@@ -91,7 +93,6 @@ Most of distro rootfs tarballs had been rebuilt and stored at [lhroot-repo](http
 
 ## Support
 - Open issue here
-- or visit [XDA Thread](https://forum.xda-developers.com/showthread.php?t=4142803)
 
 ## Note
 - If you want to store your chroot in image file, make image file first using make_image then mount the image using mount_image script.
