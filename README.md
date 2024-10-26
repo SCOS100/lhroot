@@ -12,7 +12,7 @@ Systemless Linux chroot installer and Linux chroot boot script - Modded by ***SC
 ![Manjaro-Linux-Android](https://i.ibb.co/gdpw8QG/lhroot.png)
 
 ## NOTICE
-- Due to many cases like [this](https://github.com/FerryAr/lhroot/issues/18) and [this](https://github.com/FerryAr/lhroot/issues/21). Please make sure ALL mountpoint on chroot folder is UNMOUNTED before removing chroot folder. I don't responsible for lost all data, phone bricking, etc. You can check this repository that all the code I wrote, doesn't intentionally remove your data or bricking your phone. - This is fixed, because `killlinux` is called after exiting. Use this module if you are familiar about Linux Enviroment. DWYOR!
+~~Due to many cases like [this](https://github.com/FerryAr/lhroot/issues/18) and [this](https://github.com/FerryAr/lhroot/issues/21). Please make sure ALL mountpoint on chroot folder is UNMOUNTED before removing chroot folder. I don't responsible for lost all data, phone bricking, etc. You can check this repository that all the code I wrote, doesn't intentionally remove your data or bricking your phone.~~ This is fixed, because `killlinux` is called after exiting. Use this module if you are familiar about Linux Enviroment. DWYOR!
 
 ## Usage
 
@@ -88,7 +88,7 @@ mount_image <path to img> <path to linux directory>
 ## License
 Licensed under GNU GPL v3
 
-~~The rootfs tarball is taken from AnLinux Resources [Repository](https://github.com/EXALAB/Anlinux-Resources)~~
+The rootfs tarball is taken from AnLinux Resources [Repository](https://github.com/EXALAB/Anlinux-Resources)
 Most of distro rootfs tarballs had been rebuilt and stored at [lhroot-repo](https://github.com/FerryAr/lhroot-repo)
 
 ## Support
