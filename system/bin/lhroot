@@ -139,8 +139,9 @@ ubuntu () {
     echo "$div"
     echo "Type distro version or codename."
     echo "$div"
+    echo "Latest as I'm writing this: 24.10/oracular"
+    echo "$div"
     echo ""
-    echo "Exa"
     read -r choice?'--> '
     if [ "$first" != 1 ]; then
         if [ ! -f $tarball ]; then
