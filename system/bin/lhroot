@@ -153,7 +153,7 @@ ubuntu () {
                 *)
                     abort "unknown arch"
             esac
-            wget "https://cdimage.ubuntu.com/ubuntu-base/releases/${choice}/releases/ubuntu-base-${choice}-core-${archurl}.tar.xz" -qO $tarball & e_spinner
+            wget "https://cdimage.ubuntu.com/ubuntu-base/releases/${choice/releases}/ubuntu-base-${choice}-core-${archurl}-base.tar.xz" -qO $tarball & e_spinner
         fi
         mkdir -p "$folder"
         cd "$folder"
