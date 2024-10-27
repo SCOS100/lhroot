@@ -136,7 +136,7 @@ ubuntu () {
     checkdir "$folder"
     tarball="$tmp/ubuntu.tar.xz"
     archurl=
-    echo ""
+    echo "Select distro version or codename."
     read -r choice?'--> '
     if [ "$first" != 1 ]; then
         if [ ! -f $tarball ]; then
