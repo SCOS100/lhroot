@@ -136,6 +136,8 @@ ubuntu () {
     checkdir "$folder"
     tarball="$tmp/ubuntu.tar.xz"
     archurl=
+    echo ""
+    read -r choice?'--> '
     if [ "$first" != 1 ]; then
         if [ ! -f $tarball ]; then
             echo "Downloading Rootfs, please wait..."
