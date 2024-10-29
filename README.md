@@ -82,7 +82,8 @@ mount_image <path to img> <path to linux directory>
 - [ ] Built in Audio support
 
 ## Credits
-- [mod-util](https://github.com/veez21/mod-util) by @veez21- [Original lhroot](https://github.com/lhroot/lhroot)
+- [mod-util](https://github.com/veez21/mod-util) by @veez21
+- [Original lhroot](https://github.com/FerryAr/lhroot)
 - Magisk by @topjohnwu
 
 ## License
