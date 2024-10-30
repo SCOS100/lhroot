@@ -1,0 +1,22 @@
+#!/system/bin/sh
+
+echo "Warning: You're running origin mode of bootlinux, this means that the autostart of init.d items is suspended."
+
+######### IMPORT BOOTLINUX ENVIRONMENT #########
+SCRIPT_PATH=$(readlink -f $0)
+. ${SCRIPT_PATH%/*}/bootlinux_env
+
+######### STARTING run-parts #########
+# echo "Checking is there are files inside /etc/init.d to start."
+# if [ -e $mnt/etc/init.d/ ]; then
+# 	echo "Found executables, sleeping 3 seconds before starting."
+# 	sleep 3s
+# 	$busybox chroot $mnt run-parts -a start /etc/init.d/
+# fi
+
+######### STARTING ACTUAL BOOTLINUX ENVIROMENT #########
+$busybox chroot $mnt /usr/bin/env su -l
+
+######### SHUTTING DOWN BOOTLINUX ENVIROMENT #########
+# $busybox chroot $mnt run-parts -a stop /etc/init.d/
+killlinux

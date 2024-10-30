@@ -16,5 +16,5 @@ fi
 $busybox chroot $mnt /usr/bin/env su -l
 
 ######### SHUTTING DOWN BOOTLINUX ENVIROMENT #########
-$busybox chroot $mnt run-parts -a stop /etc/init.d/
+$busybox chroot $mnt run-parts -a stop /etc/init.d/ > /sdcard/log.txt
 killlinux
