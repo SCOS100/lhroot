@@ -16,7 +16,7 @@ jobs:
       - name: Whereami
         run: pwd
       - name: List Files
-        run: ls
+        run: ls && ls ..
       - name: Create Zip For release.
-        run: zip -r release.zip *
+        run: zip -r release.zip ../*
           
