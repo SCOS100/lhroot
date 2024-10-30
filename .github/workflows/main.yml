@@ -1,1 +1,2 @@
 on: push
+runs-on: ubuntu-latest
