@@ -5,15 +5,16 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v4.1.8
-        with:
-    # Name of the artifact to download. If unspecified, all artifacts for the run are downloaded.
-          name: lhroot Release
-    # Destination path. Supports basic tilde expansion. Defaults to $GITHUB_WORKSPACE
-          path: .
-    # The GitHub token used to authenticate with the GitHub API. This is required when downloading artifacts from a different repository or from a different workflow run. If this is not specified, the action will attempt to download artifacts from the current repository and the current workflow run.
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Download latest successful build artifact'
+        run: |
+          gh_last_success_run_id=$(gh run list -w $WORKFLOW --json conclusion,headBranch,databaseId --jq 'first(.[] | select(.conclusion | contains("success"))) | .databaseId')
+          [ -z "$gh_last_success_run_id" ] && echo "No successful run found" && exit 1 || true
+          gh run download $gh_last_success_run_id -n $ARTIFACT_NAME -D $OUTPUT_DIR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW: .github/workflows/main.yaml
+          ARTIFACT_NAME: lhroot Release
+          OUTPUT_DIR: .
       - name: Upload to release
         uses: JasonEtco/upload-to-release@master
         with:
