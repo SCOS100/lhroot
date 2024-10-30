@@ -15,6 +15,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
-      - name: Create Zip For release.
-        run: zip -r release.zip ./*
+      - name: Create Zip
+        run: zip -r lhroot.zip ./*
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: lhroot Release
+          path: ./lhroot.zip
           
