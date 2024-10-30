@@ -13,10 +13,8 @@ jobs:
     outputs:
       output_1: ${{ steps.gen_output.outputs.output_1 }}
     steps:
-      - name: Whereami
-        run: pwd
-      - name: List Files
-        run: ls && ls ..
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
       - name: Create Zip For release.
-        run: zip -r release.zip ../*
+        run: zip -r release.zip ./*
           
