@@ -11,7 +11,7 @@ _name=$(basename $0)
 ls /data >/dev/null 2>&1 || { echo "$ID needs to run as root!"; echo "type 'su' then '$_name'"; exit 1; }
 
 # Magisk Mod Directory
-[ -d "/sbin/.magisk" ] && MOUNTPATH="/sbin/.magisk/modules" || MOUNTPATH="$(find /dev -mindepth 2 -maxdepth 2 -type d -name ".magisk")/modules"
+[ -d "/data/adb/magisk" ] && MOUNTPATH="/data/adb/modules" || MOUNTPATH="$(find /data/adb -mindepth 2 -maxdepth 2 -type d -name "modules")"
 MODDIR="$MOUNTPATH/$ID"
 [ ! -d $MODDIR ] && { echo "Module not detected! (Note: This is probably because you're tunning an older version of android or Magisk. The recommeded version of android is 10+, and the recommended version of Magisk is 24+)"; exit 1; }
 
