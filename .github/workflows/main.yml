@@ -8,5 +8,5 @@ jobs:
       output_1: ${{ steps.gen_output.outputs.output_1 }}
     steps:
       - name: Create Zip For release.
-        run: zip -r release.zip ./*
+        run: zip -r release.zip .
           
