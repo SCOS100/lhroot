@@ -5,6 +5,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
       - name: 'Download latest successful build artifact'
         run: |
           gh_last_success_run_id=$(gh run list -w $WORKFLOW --json conclusion,headBranch,databaseId --jq 'first(.[] | select(.conclusion | contains("success"))) | .databaseId')
