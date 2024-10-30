@@ -1,9 +1,10 @@
+name: Release
+
 on: push
 
 defaults:
   run:
     shell: bash
-    working-directory: ./
 
 jobs:
   release:
@@ -17,5 +18,5 @@ jobs:
       - name: List Files
         run: ls
       - name: Create Zip For release.
-        run: zip -r release.zip
+        run: zip -r release.zip *
           
