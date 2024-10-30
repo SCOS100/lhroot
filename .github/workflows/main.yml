@@ -4,7 +4,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     name: Get a working Release.
+    outputs:
+      output_1: ${{ steps.gen_output.outputs.output_1 }}
     steps:
       - name: Create Zip For release.
-        run: zip -r release.zip . -i .
+        run: zip -r release.zip . -i $GITHUB_OUTPUT
           
