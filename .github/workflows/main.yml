@@ -1,5 +1,10 @@
 on: push
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./
+
 jobs:
   release:
     runs-on: ubuntu-latest
