@@ -134,16 +134,16 @@ debian () {
 ubuntu () {
     folder=$ubuntu
     checkdir "$folder"
-    tarball="$tmp/ubuntu.tar.xz"
+    tarball="$tmp/ubuntu.tar.gz"
     archurl=
-    echo "$div"
-    echo "Type distro version or codename."
-    echo "$div"
-    echo "Latest as I'm writing this: 24.10/oracular"
-    echo "$div"
-    echo ""
-    read -r choice?'--> '
     if [ "$first" != 1 ]; then
+	echo "$div"
+	echo "Type distro version or codename."
+	echo "$div"
+	echo "Latest as I'm writing this: 24.10/oracular"
+	echo "$div"
+	echo ""
+    	read -r choice?'--> '
         if [ ! -f $tarball ]; then
             echo "Downloading Rootfs, please wait..."
             case $ARCH in
@@ -158,7 +158,7 @@ ubuntu () {
                 *)
                     abort "unknown arch"
             esac
-            wget "https://cdimage.ubuntu.com/ubuntu-base/releases/${choice/releases}/ubuntu-base-${choice}-base-${archurl}.tar.xz" -qO $tarball & e_spinner
+            wget "https://cdimage.ubuntu.com/ubuntu-base/releases/${choice}/release/ubuntu-base-${choice}-base-${archurl}.tar.gz" -qO $tarball & e_spinner
         fi
         mkdir -p "$folder"
         cd "$folder"
