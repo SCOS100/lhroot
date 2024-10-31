@@ -85,6 +85,9 @@ mount_image <path to img> <path to linux directory>
 
 ## TODO
 - [ ] Built in Audio support
+- [x] Add debootstrap to bins
+- [ ] Add debootstrap for every distro
+- [x] Auto-Config of resolv.conf and hosts
 
 ## Credits
 - [mod-util](https://github.com/veez21/mod-util) by @veez21
