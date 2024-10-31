@@ -18,7 +18,7 @@ jobs:
       - name: Create Zip
         run: zip -r lhroot.zip ./*
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: lhroot Release
           path: ./lhroot.zip
