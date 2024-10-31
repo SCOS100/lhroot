@@ -58,6 +58,11 @@ set -x 2>$VERLOG
 # > You can add functions, variables & etc.
 # > Rather than editing the default vars above.
 
+config () {
+    echo "nameserver 8.8.8.8" > $folder/etc/resolv.conf
+    echo "127.0.0.1 localhost" > $folder/etc/hosts
+}
+
 checkdir () {
     if [ -d "$1" ]; then
         first=1
@@ -92,6 +97,7 @@ alpine () {
         echo "Decompressing Rootfs..."
         tar xf ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -125,6 +131,7 @@ debian () {
         echo "Decompressing Rootfs..."
         tar xfJ ${tarball} 2> /dev/null||:
         cd $HOME
+	confif
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -165,6 +172,7 @@ ubuntu () {
         echo "Decompressing Rootfs..."
         tar xfz ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -198,6 +206,7 @@ void () {
         echo "Decompressing Rootfs..."
         tar xfJ ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -227,6 +236,7 @@ arch_arm () {
         echo "Decompressing Rootfs..."
         tar xf ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -254,6 +264,7 @@ arch_64 () {
         echo "Decompressing Rootfs..."
         tar xf ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -280,6 +291,7 @@ manjaro () {
         echo "Decompressing Rootfs..."
         tar xf ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -313,6 +325,7 @@ kali () {
         echo "Decompressing Rootfs..."
         tar xfJ ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space"
     rm $tarball
@@ -343,6 +356,7 @@ fedora () {
         echo "Decompressing Rootfs..."
         tar xfJ ${tarball} 2> /dev/null||:
         cd $HOME
+	config
     fi
     echo "Removing rootfs tarball for some space..."
     rm $tarball
