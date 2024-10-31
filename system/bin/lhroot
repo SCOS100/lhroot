@@ -473,7 +473,7 @@ test_connection || abort "This module requires internet for running!"
 while true; do
     clear
     echo "$div"
-    title_div "Chroot Installer - Mod by SCOS100"
+    title_div "lhroot - Mod by SCOS100"
     echo "$div"
     title_div "Choose Option"
     echo "$div"
