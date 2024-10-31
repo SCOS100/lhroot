@@ -163,7 +163,7 @@ ubuntu () {
         mkdir -p "$folder"
         cd "$folder"
         echo "Decompressing Rootfs..."
-        tar xfJ ${tarball} 2> /dev/null||:
+        tar xfz ${tarball} 2> /dev/null||:
         cd $HOME
     fi
     echo "Removing rootfs tarball for some space"
