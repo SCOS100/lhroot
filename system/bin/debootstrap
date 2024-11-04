@@ -14,7 +14,7 @@ if [ -z "$DEBOOTSTRAP_DIR" ]; then
 	if [ -x /debootstrap/debootstrap ]; then
 		DEBOOTSTRAP_DIR=/debootstrap
 	else
-		DEBOOTSTRAP_DIR=/usr/share/debootstrap
+		DEBOOTSTRAP_DIR=/system/usr/share/debootstrap
 	fi
 fi
 
