@@ -486,8 +486,8 @@ options () {
 	read -r choice?'--> '
     	echo " "
 	case $choice in
-            1) if $custom_dir; do custom_dir=false; else custom_dir=true; fi ;;
-            2) if $custom_rootfs; do custom_rootfs=false; else custom_rootfs=true; fi ;;
+            1) if $custom_dir; then custom_dir=false; else custom_dir=true; fi ;;
+            2) if $custom_rootfs; then custom_rootfs=false; else custom_rootfs=true; fi ;;
             0) break ;;
         esac
 }
