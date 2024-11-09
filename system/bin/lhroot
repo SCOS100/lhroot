@@ -32,6 +32,10 @@ void="/data/void"
 
 tmp="/data/local/tmp"
 
+# Set default options
+custom_dir=false
+custom_rootfs=flase
+
 # Load mod-util.sh
 . $MODDIR/mod-util.sh || exit $?
 
@@ -107,10 +111,9 @@ alpine () {
 debian () {
     folder=$debian
     checkdir "$folder"
-    tarball="$tmp/debian.tar.xz"
     archurl=
     if [ "$first" != 1 ]; then
-        if [ ! -f $tarball ]; then
+        if [ ! -f  ]; then
             echo "Downloading Rootfs, please wait..."
             case $ARCH in
                 arm)
@@ -124,17 +127,11 @@ debian () {
                 *)
                     abort "unknown arch" ;;
             esac
-            wget "https://raw.githubusercontent.com/FerryAr/lhroot-repo/main/Rootfs/Debian/${archurl}/debian-rootfs-${archurl}.tar.xz" -qO $tarball & e_spinner
+            debootstrap --arch=$archurl stable $folder & e_spinner
         fi
-        mkdir -p "$folder"
-        cd "$folder"
-        echo "Decompressing Rootfs..."
-        tar xfJ ${tarball} 2> /dev/null||:
         cd $HOME
-	confif
+	config
     fi
-    echo "Removing rootfs tarball for some space"
-    rm $tarball
     echo "You can now launch Debian with the bootlinux script"
 }
 
@@ -425,7 +422,7 @@ remove_chroot () {
                 installed=true
                 lmount=$arch
                 ;;
-            3) 
+            3)
                 installed=true
                 lmount=$alpine
                 ;;
@@ -478,6 +475,12 @@ remove_chroot () {
         fi
     done
 }
+options () {
+    echo "$div"
+    title_div "Select Option"
+    echo "$div"
+    echo "1. "
+}
 
 mod_head
 echo " "
@@ -493,12 +496,14 @@ while true; do
     echo "$div"
     echo "1. Install Chroot"
     echo "2. Remove Chroot"
+    echo "3. Options"
     echo "q. quit"
     read -r choice?'--> '
     echo " "
     case $choice in
         1) install_chroot ;;
         2) remove_chroot ;;
+	3) options ;;
         q) exit 0 ;;
     esac
 done
