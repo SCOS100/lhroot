@@ -501,6 +501,12 @@ test_connection || abort "This module requires internet for running!"
 
 while true; do
     clear
+    echo "#       #    #  #####    ####    ####   #####"
+    echo "#       #    #  #    #  #    #  #    #    #"
+    echo "#       ######  #    #  #    #  #    #    #"
+    echo "#       #    #  #####   #    #  #    #    #"
+    echo "#       #    #  #   #   #    #  #    #    #"
+    echo "######  #    #  #    #   ####    ####     #"
     echo "$div"
     title_div "lhroot - Mod by SCOS100"
     echo "$div"
