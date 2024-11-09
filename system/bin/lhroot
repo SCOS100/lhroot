@@ -490,6 +490,7 @@ options () {
             2) if $custom_rootfs; then custom_rootfs=false; else custom_rootfs=true; fi ;;
             0) break ;;
         esac
+    done
 }
 
 mod_head
