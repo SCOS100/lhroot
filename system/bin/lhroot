@@ -476,10 +476,20 @@ remove_chroot () {
     done
 }
 options () {
-    echo "$div"
-    title_div "Select Option"
-    echo "$div"
-    echo "1. "
+    while true; do
+    	echo "$div"
+    	title_div "Select Option"
+    	echo "$div"
+	echo "0. Back"
+    	echo "1. Custom Directory for installation: $custom_dir"
+	echo "2. Custom Rootfs for installation: $custom_rootfs"
+	read -r choice?'--> '
+    	echo " "
+	case $choice in
+            1) if $custom_dir; do custom_dir=false; else custom_dir=true; fi ;;
+            2) if $custom_rootfs; do custom_rootfs=false; else custom_rootfs=true; fi ;;
+            0) break ;;
+        esac
 }
 
 mod_head
