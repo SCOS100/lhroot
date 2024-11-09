@@ -34,7 +34,7 @@ tmp="/data/local/tmp"
 
 # Set default options
 custom_dir=false
-custom_rootfs=flase
+custom_rootfs=false
 
 # Load mod-util.sh
 . $MODDIR/mod-util.sh || exit $?
@@ -477,11 +477,12 @@ remove_chroot () {
 }
 options () {
     while true; do
+	clear
     	echo "$div"
     	title_div "Select Option"
     	echo "$div"
 	echo "0. Back"
-    	echo "1. Custom Directory for installation: $custom_dir"
+    	echo "1. Custom Directory for installation (Debian and Ubuntu Only): $custom_dir"
 	echo "2. Custom Rootfs for installation: $custom_rootfs"
 	read -r choice?'--> '
     	echo " "
