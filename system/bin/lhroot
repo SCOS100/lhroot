@@ -482,8 +482,8 @@ options () {
     	title_div "Select Option"
     	echo "$div"
 	echo "0. Back"
-    	echo "1. Custom Directory for installation (Debian and Ubuntu Only): $custom_dir"
-	echo "2. Custom Rootfs for installation: $custom_rootfs"
+    	echo -n "${BL}1. Custom Directory for installation (Debian and Ubuntu Only):"; if $custom_dir; then echo -n "$G $custom_dir $N \n"; else echo -n "$R $custom_dir $N \n"; fi
+	echo -n "${BL}2. Custom Rootfs for installation:"; if $custom_rootfs; then echo -n "$G $custom_rootfs $N \n"; else echo -n "$R $custom_rootfs $N \n"; fi
 	read -r choice?'--> '
     	echo " "
 	case $choice in
@@ -501,12 +501,12 @@ test_connection || abort "This module requires internet for running!"
 
 while true; do
     clear
-    echo "#       #    #  #####    ####    ####   #####"
-    echo "#       #    #  #    #  #    #  #    #    #"
-    echo "#       ######  #    #  #    #  #    #    #"
-    echo "#       #    #  #####   #    #  #    #    #"
-    echo "#       #    #  #   #   #    #  #    #    #"
-    echo "######  #    #  #    #   ####    ####     #"
+    echo "$R#       #    #  #####    ####    ####   ##### $N"
+    echo "$G#       #    #  #    #  #    #  #    #    # $N"
+    echo "$B#       ######  #    #  #    #  #    #    # $N"
+    echo "$Y#       #    #  #####   #    #  #    #    # $N"
+    echo "$C#       #    #  #   #   #    #  #    #    # $N"
+    echo "$V######  #    #  #    #   ####    ####     # $N"
     echo "$div"
     title_div "lhroot - Mod by SCOS100"
     echo "$div"
