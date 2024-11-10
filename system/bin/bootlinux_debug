@@ -2,19 +2,24 @@
 
 ######### IMPORT BOOTLINUX ENVIRONMENT #########
 SCRIPT_PATH=$(readlink -f $0)
-. ${SCRIPT_PATH%/*}/bootlinux_env
+. ${SCRIPT_PATH%/*}/bootlinux_env > /sdcard/log.1.txt
 
 ######### STARTING run-parts #########
-echo "Checking is there are files inside /etc/init.d to start."
 if [ -e $mnt/etc/init.d/ ]; then
-	echo "Found executables, sleeping 3 seconds before starting."
+	echo "Found executables in init.d, sleeping 3 seconds before starting."
 	sleep 3s
-	$busybox chroot $mnt run-parts -a start /etc/init.d/
+	read -r choice?'Run /etc/init.d scripts? (Y/N)--> '
+	echo ""
+	if [ $choice = "Y" ]
+		$busybox chroot $mnt run-parts -a start /etc/init.d/; clear; env su -l
+		$busybox chroot $mnt run-parts -a stop /etc/init.d/ > /sdcard/log.2.txt
+	else
+		$busybox chroot $mnt /usr/bin/env su -l
+	fi
+else
+	######### STARTING ACTUAL BOOTLINUX ENVIROMENT #########
+	$busybox chroot $mnt /usr/bin/env su -l
 fi
 
-######### STARTING ACTUAL BOOTLINUX ENVIROMENT #########
-$busybox chroot $mnt /usr/bin/env su -l
-
 ######### SHUTTING DOWN BOOTLINUX ENVIROMENT #########
-$busybox chroot $mnt run-parts -a stop /etc/init.d/ > /sdcard/log.txt
-killlinux $1
+. ${SCRIPT_PATH%/*}/killlinux $1 > /sdcard/log.3.txt

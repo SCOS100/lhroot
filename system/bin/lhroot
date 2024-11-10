@@ -67,6 +67,17 @@ config () {
     echo "127.0.0.1 localhost" > $folder/etc/hosts
 }
 
+folder_setup () {
+	if [ $custom_dir = "1" ]; then
+		echo "$div"
+		title_div "Select dir name"
+		echo "$div"
+		read -r dir?'-->'
+		echo ""
+		folder="/data/linux/${dir}"
+	fi
+}
+
 checkdir () {
     if [ -d "$1" ]; then
         first=1
@@ -76,6 +87,7 @@ checkdir () {
 
 alpine () {
 	folder=$alpine
+	folder_setup
 	tarball="$tmp/alpine.tar.gz"
 	archurl=
 	checkdir "$folder"
@@ -110,6 +122,7 @@ alpine () {
 
 debian () {
     folder=$debian
+    folder_setup
     checkdir "$folder"
     archurl=
     if [ "$first" != 1 ]; then
@@ -137,6 +150,7 @@ debian () {
 
 ubuntu () {
     folder=$ubuntu
+    folder_setup
     checkdir "$folder"
     tarball="$tmp/ubuntu.tar.gz"
     archurl=
@@ -178,6 +192,7 @@ ubuntu () {
 
 void () {
     folder=$void
+    folder_setup
     checkdir "$folder"
     tarball="$tmp/void.tar.xz"
     archurl=
@@ -212,6 +227,7 @@ void () {
 
 arch_arm () {
     folder=$arch
+    folder_setup
     checkdir "$folder"
     tarball="$tmp/arch.tar.gz"
     if [ "$first" != 1 ]; then
@@ -242,6 +258,7 @@ arch_arm () {
 
 arch_64 () {
     folder=$arch
+    folder_setup
     checkdir "$folder"
     tarball="$tmp/arch.tar.gz"
     if [ "$first" != 1 ]; then
@@ -269,7 +286,8 @@ arch_64 () {
 }
 
 manjaro () {
-    folder="/data/manjaro"
+    folder=$manjaro
+    folder_setup
     checkdir "$folder"
     tarball="$tmp/manjaro.tar.xz"
     if [ "$first" != 1 ]; then
@@ -296,7 +314,8 @@ manjaro () {
 }
 
 kali () {
-    folder="/data/kali"
+    folder=$kali
+    folder_setup
     checkdir "$folder"
     tarball="$tmp/kali.tar.xz"
     if [ "$first" != 1 ]; then
@@ -330,7 +349,8 @@ kali () {
 }
 
 fedora () {
-    folder="/data/fedora"
+    folder=$fedora
+    folder_setup
     checkdir "$folder"
     tarball="$tmp/fedora.tar.xz"
     if [ "$first" != 1 ]; then
@@ -487,11 +507,44 @@ options () {
 	read -r choice?'--> '
     	echo " "
 	case $choice in
-            1) if $custom_dir; then custom_dir=false; else custom_dir=true; fi ;;
-            2) if $custom_rootfs; then custom_rootfs=false; else custom_rootfs=true; fi ;;
+            1) if $custom_dir; then custom_dir=false; custom_rootfs=false; else warning "dir"; fi ;;
+            2) if $custom_rootfs; then custom_rootfs=false; else warning "rootfs"; fi ;;
             0) break ;;
         esac
     done
+}
+warning () {
+    echo "$div"
+    title_div "${R}Warning!${N}"
+    echo "$div"
+    echo "Before proceeding remember this:"
+    if [ "$1" = "dir" ]; then
+	echo "If you install a chroot with custom partitions,"
+	echo "it will install to /data/linux/(custom name without spaces)"
+	echo "and not to /data/. Wanna Continue? (Y-yes/N-no)"
+	read -r choice?'--> '
+	echo ""
+	case $choice in
+	    Y) custom_dir=true ;;
+	    N) ;;
+	esac
+    elif [ "$1" = "rootfs" ]; then
+	echo "If you install a cuatom chroot, you must have the file (tar.xz only)"
+	echo "and it will be installed to /data/linux/(custom name without spaces)"
+	echo "and not on /data/. I'm not responsible for virus filled chroots"
+	echo "or other malicus software that might break your phone."
+	echo "Wanna continue? (Y-yes/N-no)"
+	read -r choice?'--> '
+	echo ""
+	case $choice in
+            Y) custom_dir=true; custom_rootfs=true ;;
+	    N) ;;
+	esac
+    else
+	clear
+	echo "[${R}E${N}] Could not detect correct warning."
+	sleep 5
+    fi
 }
 
 mod_head
