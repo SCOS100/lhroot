@@ -126,22 +126,20 @@ debian () {
     checkdir "$folder"
     archurl=
     if [ "$first" != 1 ]; then
-        if [ ! -f  ]; then
-            echo "Downloading Rootfs, please wait..."
-            case $ARCH in
-                arm)
-                    archurl="armhf" ;;
-                arm64)
-                    archurl="arm64" ;;
-                x86)
-                    archurl="i386" ;;
-                x64)
-                    archurl="amd64" ;;
-                *)
-                    abort "unknown arch" ;;
-            esac
-            debootstrap --arch=$archurl stable $folder & e_spinner
-        fi
+        echo "Downloading Rootfs, please wait..."
+        case $ARCH in
+            arm)
+                archurl="armhf" ;;
+            arm64)
+                archurl="arm64" ;;
+            x86)
+                archurl="i386" ;;
+            x64)
+                archurl="amd64" ;;
+            *)
+                abort "unknown arch" ;;
+        esac
+        debootstrap --arch=$archurl stable $folder & e_spinner && echo "Done."
         cd $HOME
 	config
     fi
@@ -529,7 +527,7 @@ warning () {
 	    N) ;;
 	esac
     elif [ "$1" = "rootfs" ]; then
-	echo "If you install a cuatom chroot, you must have the file (tar.xz only)"
+	echo "If you install a custom chroot, you must have the file (tar.xz only)"
 	echo "and it will be installed to /data/linux/(custom name without spaces)"
 	echo "and not on /data/. I'm not responsible for virus filled chroots"
 	echo "or other malicus software that might break your phone."
