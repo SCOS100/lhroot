@@ -165,14 +165,6 @@ mount_linux_chroot() {
     # ln -s /dev/tun /dev/net/tun 2> /dev/null
 
     ######### SET DNS ########
-
-    # setup
-    rm $mnt/etc/resolv.conf
-    touch $mnt/etc/resolv.conf
-
-    # add two public dns entries
-    echo "nameserver 1.1.1.1" >> $mnt/etc/resolv.conf
-    echo "nameserver 1.0.0.1" >> $mnt/etc/resolv.conf
     chmod 644 $mnt/etc/resolv.conf
 
     ######### MOUNTING FILESYSTEM IN CHROOT #########
@@ -192,7 +184,7 @@ mount_linux_chroot() {
         [ ! -d $mnt/dev/pts ] && mkdir -p $mnt/dev/pts
         $busybox mount -t devpts devpts $mnt/dev/pts && bllog "[+] mounted /dev/pts"
     fi
-    
+
     ######### MOUNT DEV SHM ########
     if [ ! "$(mountpoint $mnt/dev/shm 2> /dev/null | grep 'is a')" ]; then
         [ ! -d $mnt/dev/shm ] && mkdir -p $mnt/dev/shm
@@ -279,9 +271,6 @@ mount_linux_chroot() {
 
     # NETWORK SETTINGS #
     $busybox sysctl -w net.ipv4.ip_forward=1
-    echo "127.0.0.1		 localhost linux" > $mnt/etc/hosts
-    echo "::1				 localhost ip6-localhost ip6-loopback" >> $mnt/etc/hosts
-    echo "linux" > $mnt/proc/sys/kernel/hostname
     echo "The Linux chroot has been started."
     if [ -f /sdcard/debug ]; then
         echo " [!] Everytime you mount the linux chroot, please press ENTER to continue. (If chroot is already mounted, this won't prompt.)"

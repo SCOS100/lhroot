@@ -63,6 +63,13 @@ set -x 2>$VERLOG
 # > Rather than editing the default vars above.
 
 config () {
+    if [ ! -e $folder/etc ]; then
+        mkdir $folder/etc
+    fi
+    if [ ! -e $folder/sys/kernel ]; then
+        mkdir $folder/sys/kernel
+    fi
+    echo "[i] Setting up network..."
     echo "nameserver 8.8.8.8" > $folder/etc/resolv.conf
     echo "127.0.0.1 localhost" > $folder/etc/hosts
 }
