@@ -1,0 +1,10 @@
+#!$PATH/bash
+if [ $(for i in $(ls $CWD); do if [ $i == zip-all ]; then echo yes; break; fi; done) == "yes" ]; then
+	version="$(cat ../module.prop | grep -w version | cut -d= -f2 -s)"
+	zip -0 -r  "lhroot-${version}-release.zip" ../*
+elif [ $(for i in $(ls $CWD); do if [ $i == module.prop ]; then echo yes; break; fi; done) == "yes" ]; then
+	version="$(cat module.prop | grep -w version | cut -d= -f2 -s)"
+        zip -0 -r "lhroot-${version}-release.zip" ./*
+else
+	echo "[E] Did not detect either zip-all nor module.prop. Make sure you're running this in the lhroot repo."
+fi
