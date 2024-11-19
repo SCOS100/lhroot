@@ -146,7 +146,7 @@ debian () {
             *)
                 abort "unknown arch" ;;
         esac
-        debootstrap --arch=$archurl stable $folder & e_spinner && echo "Done."
+        debootstrap --arch=$archurl --extractor=ar stable $folder & e_spinner && echo "Done."
         cd $HOME
 	config
     fi
