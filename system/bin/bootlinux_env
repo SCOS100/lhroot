@@ -1,5 +1,7 @@
 #!/system/bin/sh
 
+exec 2>/dev/null
+
 ######### IMPORT BOOTLINUX INITIALIZATION #########
 SCRIPT_PATH=$(readlink -f $0)
 . ${SCRIPT_PATH%/*}/bootlinux_log
@@ -24,6 +26,8 @@ export BOOTCLASSPATH=/apex/com.android.art/javalib/core-oj.jar:/apex/com.android
 export DEX2OATBOOTCLASSPATH=/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/system/framework/framework.jar:/system/framework/framework-graphics.jar:/system/framework/ext.jar:/system/framework/telephony-common.jar:/system/framework/voip-common.jar:/system/framework/ims-common.jar:/apex/com.android.i18n/javalib/core-icu4j.jar:/system/framework/telephony-ext.jar
 unset LD_PRELOAD
 unset PREFIX
+
+exec 2>&1
 
 ######### TERMINAL SETUP #########
 clear

@@ -1,5 +1,7 @@
 #!/system/bin/sh
 
+exec 2>/dev/null
+
 ######### IMPORT BOOTLINUX ENVIRONMENT #########
 SCRIPT_PATH=$(readlink -f $0)
 . ${SCRIPT_PATH%/*}/bootlinux_env
@@ -18,3 +20,5 @@ $busybox chroot $mnt /usr/bin/env su -l
 ######### SHUTTING DOWN BOOTLINUX ENVIROMENT #########
 $busybox chroot $mnt run-parts -a stop /etc/init.d/
 . ${SCRIPT_PATH%/*}/killlinux $1
+
+exec 2>&1

@@ -1,5 +1,7 @@
 #!/system/bin/sh
 
+exec 2>/dev/null
+
 if [ -x /system/xbin/busybox ]; then
 	busybox=/system/xbin/busybox
 elif [ -x /system/bin/busybox ]; then
@@ -291,3 +293,5 @@ else
     echo "Missing required folder, exit now...."
     exit 1
 fi
+
+exec 2>&1
