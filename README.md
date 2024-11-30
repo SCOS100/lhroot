@@ -8,6 +8,7 @@ Systemless Linux chroot installer and Linux chroot boot script - Modded by ***SC
 - coreutils for make_image
 - mke2fs for make_image
 - This module
+- Termux (For Debian)
 
 ![Manjaro-Linux-Android](https://i.ibb.co/gdpw8QG/lhroot.png)
 
@@ -20,6 +21,8 @@ This is fixed, because `killlinux` is called after exiting. Use this module if y
 To download, look at the latest available artifact made by going to [this link.](https://github.com/SCOS100/lhroot/actions)
 
 ## Usage
+
+*If you're running this on Termux, remember to install root-repo and tsu, and append `sudo` before each command.*
 
 ```console
 lhroot
