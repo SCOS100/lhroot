@@ -30,9 +30,10 @@ lhroot
 
 and follow the instructions.
 
-## Warning before proceeding:
+### Warning before proceeding:
 Due to a new feature, the `bootlinux` command now starts all /etc/init.d files. Because of this, remember to use `bootlinux_origin` if you have elogind, seatd, or SysVInit installed, or your phone will shutdown once exited.
 
+##
 After installation to boot into Linux Chroot use :
 
 ```console
