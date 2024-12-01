@@ -1,5 +1,7 @@
 #!/system/bin/sh
 
+exec 2>/dev/null
+
 if [ -x /system/xbin/busybox ]; then
 	busybox=/system/xbin/busybox
 elif [ -x /system/bin/busybox ]; then
@@ -49,7 +51,7 @@ kill_pids() {
         local pids=$($busybox lsof | grep "$mnt" | awk '{print $2}' | uniq)
     fi
     if [ -n "${pids}" ]; then
-        kill -9 ${pids} 2> /dev/null
+        kill -9 ${pids} 2>/dev/null
         return $?
     fi
     return 0
@@ -92,10 +94,12 @@ $busybox umount $mnt/linkerconfig && echo "unmounted linkerconfig"
 
 cd "$mnt/apex"
 for f in *; do
-    $busybox umount "$mnt/apex/$f" && echo "unmounted apex/$f"
+    /system/bin/toybox umount -l "$mnt/apex/$f" && echo "unmounted apex/$f"
 done
 cd - 2>&1 > /dev/null
+exec 2>/dev/null
 
 export PATH=$PRESERVED_PATH
 
 echo "[i] Hey, before you try to rm -rf the whole distro, remember to close the app you're running this command on completely, then you can do whatever you want."
+exec 2>&1

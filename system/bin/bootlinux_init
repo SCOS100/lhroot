@@ -152,6 +152,7 @@ mount_linux_chroot() {
         done
         cd - 2>&1 > /dev/null
     fi
+    exec 2>/dev/null
     mkdir -p $mnt/data/data
     mkdir -p $mnt/data/dalvik-cache
     mkdir -p $mnt/vendor
