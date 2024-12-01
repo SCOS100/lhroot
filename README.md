@@ -8,6 +8,7 @@ Systemless Linux chroot installer and Linux chroot boot script - Modded by ***SC
 - coreutils for make_image
 - mke2fs for make_image
 - This module
+- Termux (For Debian)
 
 ![Manjaro-Linux-Android](https://i.ibb.co/gdpw8QG/lhroot.png)
 
@@ -21,12 +22,20 @@ To download, look at the latest available artifact made by going to [this link.]
 
 ## Usage
 
+*If you're running this on Termux, remember to install root-repo and tsu, and append `sudo` before each command.*
+
 ```console
 lhroot
 ```
 
-and follow the instructions
+and follow the instructions.
 
+##
+
+### Warning before proceeding:
+Due to a new feature, the `bootlinux` command now starts all /etc/init.d files. Because of this, remember to use `bootlinux_origin` if you have elogind, seatd, or SysVInit installed, or your phone will shutdown once exited.
+
+##
 After installation to boot into Linux Chroot use :
 
 ```console
@@ -45,7 +54,7 @@ To unmount bind directory use :
 killlinux
 ```
 
-***Note***: You don't need to do this anymore, after the exit command is supplied or KILL signal is executed.
+***Note***: You don't need to do this anymore, after the exit command is executed.
 
 To terminate specific instance, just pass chroot folder, e.g.
 
