@@ -94,7 +94,7 @@ $busybox umount $mnt/linkerconfig && echo "unmounted linkerconfig"
 
 cd "$mnt/apex"
 for f in *; do
-    /system/bin/toybox umount -l "$mnt/apex/$f" && echo "unmounted apex/$f"
+    /system/bin/toybox umount "$mnt/apex/$f" && echo "unmounted apex/$f"
 done
 cd - 2>&1 > /dev/null
 exec 2>/dev/null
